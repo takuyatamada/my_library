@@ -32,31 +32,32 @@ def access_lending_page(driver):
     dropdown =driver.find_element_by_class_name('dataTables_selector')
     select = Select(dropdown)
     select.select_by_value('100')
-    # time.sleep(10)
 
 def check_expand(driver):
+    #延長した本のタイトル
     extend_list=[]
+
+    #返却に行かなければいけない本のタイトル
     due_near_list = []
+    
+    #貸し出し状況が入ったテーブルの要素を指定
     lending_tbody_elm = driver.find_element_by_xpath('/html/body/div[1]/div[5]/div/div/form/div[2]/table/tbody')
-    # print(lending_tbody_elm.text)
-    #各行をtrsにいれる
+    
+    #テーブルの各行をtrsにいれる
     trs = lending_tbody_elm.find_elements(By.TAG_NAME, "tr")
-    # print('len',len(lending_tbody_elm))
-    # print('trs',trs.text)
     for tr in trs:
-        # print(tr.text)
-        # due = tr.find_elements_by_css_selector('td')
-        # due = tr.find_element_by_tag_name('td')
         due = tr.find_element_by_xpath("td[@class='nowrap re_rndate']").text
         title = tr.find_element_by_xpath("td[@class='max_width re_title']").text
         
-        #check_box_textが空白(' )なら延長できない
+        #check_box_textが空白(' ')なら延長できない
         check_box_text = tr.find_element_by_xpath("td[@class='nowrap re_check']").text
         extend_flag,day_difference = judge_extend(due,title,check_box_text)
+        #延長する必要があれば延長ボタンにチェックを入れる
         if extend_flag:
             tr.find_element_by_xpath("td/input").click()
             extend_list.append(title)
 
+        #期限が近付いていて延長もできないほんのタイトルをdue_near_listに追加
         #extend_flagのextend_marginと値を合わせておく
         if extend_flag==False and day_difference<=3:
             due_near_list.append(title)
@@ -73,8 +74,11 @@ def check_expand(driver):
 def judge_extend(due,title,check_box_text):
     due_datetime = datetime.strptime(due,'%Y.%m.%d')
     now_datetime = datetime.now()
+    
+    #返却までの日数
     day_difference = (due_datetime - now_datetime).days + 1
     flag = False 
+    #check_box_textが空白(' ')なら延長できない
     if check_box_text==' ':
         return flag,day_difference
     #何日前なら延長するのかの決定、3日前にしとくか、、、
@@ -83,13 +87,12 @@ def judge_extend(due,title,check_box_text):
     now_datetime = datetime.now()
     day_difference = (due_datetime - now_datetime).days + 1
 
+    #返却までの日数が規定の日にち以下ならflagをTrueにして延長できるようにする
     if day_difference <= extend_margin:
         flag = True 
     return flag,day_difference
-    # print(day_difference)
 
 def send_line_main(extend_list,due_near_list):
-    # toke = 'lfteLHPfA3fEqOQhwwtWjJPAmhpTeDFafN7G5JUQIJ6'
     if len(extend_list)==0 and len(due_near_list)==0:
         return 
     message = '延長した本 \n'
