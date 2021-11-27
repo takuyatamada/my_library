@@ -39,7 +39,7 @@ def check_expand(driver):
 
     #返却に行かなければいけない本のタイトル
     due_near_list = []
-    
+
     #貸し出し状況が入ったテーブルの要素を指定
     lending_tbody_elm = driver.find_element_by_xpath('/html/body/div[1]/div[5]/div/div/form/div[2]/table/tbody')
     
@@ -66,8 +66,9 @@ def check_expand(driver):
         # print(due,title,check_box_text)
 
     #一括延長クリック
-    bulk_extension_elm = driver.find_element_by_class_name('btn_lead')
-    bulk_extension_elm.click()
+    if len(extend_list)!=0:
+        bulk_extension_elm = driver.find_element_by_class_name('btn_lead')
+        bulk_extension_elm.click()
 
     return extend_list,due_near_list
 
